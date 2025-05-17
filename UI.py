@@ -36,7 +36,7 @@ class BackgroundFader(pygame.sprite.Sprite):
         self.BackgroundRect.center = CenterPos
 
     def UpdateBackground(self, Screen):
-        if self.BackgroundFading:
+        if not Config.GAME_PAUSED and self.BackgroundFading:
             self.BackgroundAlpha += self.FadeSpeed * self.FadeDirection
 
             if self.BackgroundAlpha >= 255:
@@ -323,7 +323,7 @@ class Slider(pygame.sprite.Sprite):
         pygame.draw.rect(Screen, self.KnobRectColor, self.KnobRect)
 
     def update(self, Screen):
-        self.CheckForMouse()
+        if not Config.GAME_PAUSED: self.CheckForMouse()
         self.Draw(Screen)
 
 class ToggleButton(pygame.sprite.Sprite):

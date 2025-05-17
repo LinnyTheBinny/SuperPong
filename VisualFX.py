@@ -61,7 +61,7 @@ class WhiteSquareParticle(pygame.sprite.Sprite):
         Screen.blit(self.ParticleSurfaceClone, self.ParticleRect)
 
     def update(self, Screen):
-        self.UpdateSurface()
+        if not Config.GAME_PAUSED: self.UpdateSurface()
         self.Draw(Screen)
 
 # FUNCTIONS #

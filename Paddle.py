@@ -42,5 +42,5 @@ class Paddle(pygame.sprite.Sprite):
         pygame.draw.rect(Screen, "WHITE", self.rect)
 
     def update(self, Screen):
-        self.CheckForMovement()
+        if not Config.GAME_PAUSED: self.CheckForMovement()
         self.Draw(Screen)

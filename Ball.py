@@ -111,5 +111,5 @@ class Ball(pygame.sprite.Sprite):
         pygame.draw.circle(Screen, "WHITE", self.rect.center, 10)
 
     def update(self):
-        self.Move()
+        if not Config.GAME_PAUSED: self.Move()
         self.CheckForChangeDirection()

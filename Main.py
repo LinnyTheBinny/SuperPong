@@ -28,6 +28,8 @@ SControlText = None
 UpControlText= None
 DownControlText = None
 
+PausedTitle = None
+
 # FUNCTIONS #
 
 def CleanPreviousScene():
@@ -38,6 +40,7 @@ def CleanPreviousScene():
     UI.InstructionTextGroup.empty()
     UI.ToggleButtonsGroup.empty()
     VisualFX.WhiteSqaresGroup.empty()
+    UI.SlidersGroup.empty()
 
 SoundPlayer.PlayMusic("BackgroundMusic.mp3")
 
@@ -204,6 +207,40 @@ def RemoveInstructions():
     threading.Timer(1.0, EndInstructions).start() if Config.SpecialEffectsEnabled else EndInstructions()
     SoundPlayer.FadeOutMusic()
 
+def RemovePausedScreen():
+    global GameState, PausedTitle
+
+    if PausedTitle: PausedTitle.kill()
+
+    GameState = "PlayerVSPlayer"
+    Config.GAME_PAUSED = False
+
+def SetUpPausedScreen():
+    global GameState, PausedTitle
+
+    GameState = "Paused"
+    Config.GAME_PAUSED = True
+
+    PausedTitle = UI.Text(Screen, "Paused", UI.TitlePixelFont, (Config.SCREEN_SIZE_X / 2, Config.SCREEN_SIZE_Y / 2 - 130), (255, 255, 255), 255, False, False, None)
+
+def UpdatePausedScreen():
+    UI.BackgroundsGroup.update(Screen)
+    Paddle.PaddleGroup.update(Screen)
+    Ball.BallGroup.update()
+    UI.TextsGroup.update(Screen)
+    UI.InstructionTextGroup.update(Screen)
+    VisualFX.WhiteSqaresGroup.update(Screen)
+
+    for BallObject in Ball.BallGroup: BallObject.Draw(Screen); BallObject.CheckForBallScored(RedBackground, BlueBackground, ScoreClass)
+
+    BlackSurface = pygame.Surface((Config.SCREEN_SIZE_X, Config.SCREEN_SIZE_Y), pygame.SRCALPHA)
+    BlackSurface.fill("Black")
+    BlackSurface.set_alpha(220)
+
+    Screen.blit(BlackSurface, (0, 0))
+
+    if PausedTitle: PausedTitle.update(Screen)
+
 # GAME LOOP # 
 
 while True:
@@ -214,8 +251,9 @@ while True:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 if Config.GAME_START_INSTRUCTIONS: RemoveInstructions()
-            if event.key == pygame.K_ESCAPE and GameState == "PlayerVSPlayer":
-                print("pause")
+            if event.key == pygame.K_ESCAPE and GameState != "MainMenu" and GameState != "Settings":
+                if Config.GAME_PAUSED: RemovePausedScreen()
+                else: SetUpPausedScreen(); SoundPlayer.PlaySound("Pause.mp3", 100)
 
     MainScreen.fill("BLACK")
     Screen.fill("BLACK")
@@ -226,6 +264,9 @@ while True:
         UpdateSettingsScreen()
     elif GameState == "PlayerVSPlayer":
         UpdatePlayerVSPlayerScreen()
+    elif GameState == "Paused":
+        UpdatePausedScreen()
+
 
     SoundPlayer.UpdateMusicVolume()
 
