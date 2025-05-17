@@ -32,4 +32,4 @@ def FadeOutMusic():
 
     if CurrentMusic != None:
         CurrentMusic.fadeout(3000)
-        CurrentMusic = True
+        CurrentMusic = None
