@@ -31,16 +31,15 @@ class Ball(pygame.sprite.Sprite):
         self.YSpeed = math.cos(RandomAngle)
 
     def BallBounceEffectStart(self, AxisToCheck):
+        if AxisToCheck == "Y": SoundPlayer.PlaySound("WallHit.mp3", 20 + (round(abs(self.XSpeed * self.Speed) + abs(self.YSpeed * self.Speed), 2)) * 2)
+        else: SoundPlayer.PlaySound("BallBounce.mp3", 20 + (round(abs(self.XSpeed * self.Speed) + abs(self.YSpeed * self.Speed), 2)) * 2)
+
         if not Config.SpecialEffectsEnabled: return
 
         if AxisToCheck == "Y":
-            SoundPlayer.PlaySound("WallHit.mp3", 20 + (round(abs(self.XSpeed * self.Speed) + abs(self.YSpeed * self.Speed), 2)) * 2)
-
             if self.YSpeed > 0: VisualFX.BallBounceEffect(self.rect.center, 360, 20)
             else: VisualFX.BallBounceEffect(self.rect.center, 180, 20)
         else:
-            SoundPlayer.PlaySound("BallBounce.mp3", 20 + (round(abs(self.XSpeed * self.Speed) + abs(self.YSpeed * self.Speed), 2)) * 2)
-
             if self.XSpeed > 0: VisualFX.BallBounceEffect(self.rect.center, 90, 5)
             else: VisualFX.BallBounceEffect(self.rect.center, 270, 5)
 

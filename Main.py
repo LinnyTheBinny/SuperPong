@@ -29,6 +29,8 @@ UpControlText= None
 DownControlText = None
 
 PausedTitle = None
+BackToMenuButton = None
+RestartButton = None
 
 # FUNCTIONS #
 
@@ -211,20 +213,49 @@ def RemovePausedScreen():
     global GameState, PausedTitle
 
     if PausedTitle: PausedTitle.kill()
+    if BackToMenuButton: BackToMenuButton.kill()
+    if RestartButton: RestartButton.kill()
 
     GameState = "PlayerVSPlayer"
     Config.GAME_PAUSED = False
 
 def SetUpPausedScreen():
-    global GameState, PausedTitle
+    global GameState, PausedTitle, BackToMenuButton, RestartButton
 
     GameState = "Paused"
     Config.GAME_PAUSED = True
 
-    PausedTitle = UI.Text(Screen, "Paused", UI.TitlePixelFont, (Config.SCREEN_SIZE_X / 2, Config.SCREEN_SIZE_Y / 2 - 130), (255, 255, 255), 255, False, False, None)
+    PausedTitle = UI.Text(Screen, "Paused", UI.TitlePixelFont, (Config.SCREEN_SIZE_X / 2, Config.SCREEN_SIZE_Y / 2 - 100), (255, 255, 255), 255, False, False, None)
+
+    def OnBackButtonClicked():
+        Config.GAME_PAUSED = False
+        if not Config.GAME_START_INSTRUCTIONS: SoundPlayer.PlayMusic("BackgroundMusic.mp3")
+
+        if Config.SpecialEffectsEnabled:
+
+            TransitionScreen.StartFade()
+            threading.Timer(TransitionScreen.FadeSpeed / 10, SetUpMainMenu).start()
+        else:
+            SetUpMainMenu()
+
+    def OnRestartButtonClicked():
+        Config.GAME_PAUSED = False
+        if not Config.GAME_START_INSTRUCTIONS: SoundPlayer.PlayMusic("BackgroundMusic.mp3")
+
+        if Config.SpecialEffectsEnabled:
+
+            TransitionScreen.StartFade()
+            threading.Timer(TransitionScreen.FadeSpeed / 10, lambda: SetUpPlayerVSPlayer(ScoreClass.LeftScore, ScoreClass.RightScore)).start()
+        else:
+            SetUpPlayerVSPlayer(ScoreClass.LeftScore, ScoreClass.RightScore)
+
+
+    BackToMenuButton = UI.Text(Screen, "Back To Menu", UI.SmallPixelFont, (Config.SCREEN_SIZE_X / 2, Config.SCREEN_SIZE_Y / 2), (255, 255, 255), 0, True, True, OnBackButtonClicked)
+    RestartButton = UI.Text(Screen, "Restart Game", UI.SmallPixelFont, (Config.SCREEN_SIZE_X / 2, Config.SCREEN_SIZE_Y / 2 + 60), (255, 255, 255), 0, True, True, OnRestartButtonClicked)
+
 
 def UpdatePausedScreen():
-    UI.BackgroundsGroup.update(Screen)
+    if not Config.TRANSITION_FADING: UI.BackgroundsGroup.update(Screen)
     Paddle.PaddleGroup.update(Screen)
     Ball.BallGroup.update()
     UI.TextsGroup.update(Screen)
@@ -240,6 +271,8 @@ def UpdatePausedScreen():
     Screen.blit(BlackSurface, (0, 0))
 
     if PausedTitle: PausedTitle.update(Screen)
+    if BackToMenuButton: BackToMenuButton.update(Screen)
+    if RestartButton: RestartButton.update(Screen)
 
 # GAME LOOP # 
 
@@ -249,7 +282,7 @@ while True:
             pygame.quit()
             sys.exit()
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
+            if event.key == pygame.K_SPACE and not Config.GAME_PAUSED:
                 if Config.GAME_START_INSTRUCTIONS: RemoveInstructions()
             if event.key == pygame.K_ESCAPE and GameState != "MainMenu" and GameState != "Settings":
                 if Config.GAME_PAUSED: RemovePausedScreen()
@@ -266,7 +299,6 @@ while True:
         UpdatePlayerVSPlayerScreen()
     elif GameState == "Paused":
         UpdatePausedScreen()
-
 
     SoundPlayer.UpdateMusicVolume()
 

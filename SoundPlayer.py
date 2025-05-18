@@ -2,10 +2,6 @@ import pygame, Config
 
 pygame.init()
 
-# VARIABLES #
-
-CurrentMusic = None
-
 # FUNCTIONS #
 
 def PlaySound(SoundFile : str, Volume):
@@ -14,22 +10,16 @@ def PlaySound(SoundFile : str, Volume):
     Sound.play()
 
 def PlayMusic(MusicFile : str):
-    global CurrentMusic
-
-    Music = pygame.mixer.Sound("Assets/Music/" + MusicFile)
-    Music.set_volume(1 * Config.MusicVolume)
-    Music.play(100)
-    CurrentMusic = Music
+    if pygame.mixer.music.get_busy():
+        pygame.mixer.music.queue("Assets/Music/" + MusicFile)
+    else:
+        pygame.mixer.music.load("Assets/Music/" + MusicFile)
+    
+    pygame.mixer.music.set_volume(0.5 * Config.MusicVolume)
+    pygame.mixer.music.play(-1)
 
 def UpdateMusicVolume():
-    global CurrentMusic
-
-    if CurrentMusic != None:
-        CurrentMusic.set_volume(0.5 * Config.MusicVolume)
+    pygame.mixer.music.set_volume(0.5 * Config.MusicVolume)
 
 def FadeOutMusic():
-    global CurrentMusic
-
-    if CurrentMusic != None:
-        CurrentMusic.fadeout(3000)
-        CurrentMusic = None
+    pygame.mixer.music.fadeout(3000)
